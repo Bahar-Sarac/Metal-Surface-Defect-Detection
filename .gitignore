@@ -1,0 +1,12 @@
+     # Gizli şifreler
+.env
+
+# İndirilmiş olan veri seti klasörünü tamamen engelle
+dataset/
+test_set/
+
+# Python ve PyCharm kalıntıları
+venv/
+.venv/
+__pycache__/
+.idea/
