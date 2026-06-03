@@ -2,11 +2,13 @@ import os
 from collections import Counter
 import matplotlib.pyplot as plt
 
-# 1. KULLANICI AYARLARI (KLASÖR YOLU)
-# Proje klasörünün içindeki veri seti klasör adını tam olarak buraya yazın:
+# ==========================================
+# 1. USER SETTINGS (DATASET PATH & CLASSES)
+# ==========================================
+# Specify the exact dataset directory name inside your project folder:
 BASE_DATASET_DIR = "dataset"
 
-# YOLO data.yaml dosyanızdaki sınıf indeksleri ve isimleri:
+# Class indices and names matching your YOLO data.yaml file:
 CLASS_NAMES = {
     0: "crazing",
     1: "fold",
@@ -18,9 +20,13 @@ CLASS_NAMES = {
     7: "scratches"
 }
 
-# 2. VERİ SETİNİ TARAMA FONKSİYONU
+# ==========================================
+# 2. DATASET SCANNING FUNCTION
+# ==========================================
 def get_class_counts_from_split(split_name):
-    """Belirtilen split (train, valid, test) içindeki etiketleri sayar."""
+    """
+    Counts the object labels inside the specified data split (train, valid, test).
+    """
     labels_path = os.path.join(BASE_DATASET_DIR, split_name, "labels")
     counts = Counter()
 
@@ -38,29 +44,33 @@ def get_class_counts_from_split(split_name):
                     counts[class_id] += 1
     return counts
 
-# 3. ANA ANALİZ SÜRECİ
+# ==========================================
+# 3. MAIN ANALYSIS PROCESS
+# ==========================================
 def main():
     if not os.path.exists(BASE_DATASET_DIR):
-        print(f"Hata: '{BASE_DATASET_DIR}' klasörü bulunamadı! Lütfen klasör adını kontrol edin.")
+        print(f"Error: Directory '{BASE_DATASET_DIR}' not found! Please check the folder path.")
         return
 
-    # Her bir küme için sayım yapalım
+    # Count objects for each data split
     train_counts = get_class_counts_from_split("train")
     val_counts = get_class_counts_from_split("valid")
     test_counts = get_class_counts_from_split("test")
 
-    # Tüm sınıfların benzersiz ID listesini alalım (0'dan 7'ye kadar)
+    # Get the sorted list of unique class IDs (0 to 7)
     all_class_ids = sorted(list(CLASS_NAMES.keys()))
 
-    # Toplam istatistikleri hesaplamak ve tablo oluşturmak için listeler
+    # Lists to store aggregated data for plotting and reporting
     names = [CLASS_NAMES[c_id] for c_id in all_class_ids]
     total_counts = []
 
-    # 4. TERMİNALE DETAYLI TABLO YAZDIRMA
+    # ------------------------------------------
+    # 4. PRINT DETAILED TABLE TO TERMINAL
+    # ------------------------------------------
     print("\n" + "=" * 75)
-    print(f" 📊 VERİ SETİ DETAYLI SINIF DAĞILIM RAPORU ({BASE_DATASET_DIR})")
+    print(f" 📊 DETAILED DATASET CLASS DISTRIBUTION REPORT ({BASE_DATASET_DIR})")
     print("=" * 75)
-    print(f"{'Sınıf ID':<10}{'Kusur Adı':<20}{'Train':<10}{'Valid':<10}{'Test':<10}{'TOPLAM':<10}")
+    print(f"{'Class ID':<10}{'Defect Name':<20}{'Train':<10}{'Valid':<10}{'Test':<10}{'TOTAL':<10}")
     print("-" * 75)
 
     for c_id in all_class_ids:
@@ -78,26 +88,28 @@ def main():
         f"{'TOTAL':<30}{sum(train_counts.values()):<10}{sum(val_counts.values()):<10}{sum(test_counts.values()):<10}{sum(total_counts):<10}")
     print("=" * 75)
 
-    # 5. MATPLOTLIB İLE TOPLAM GRAFİĞİ ÇİZDİRME
+    # ------------------------------------------
+    # 5. PLOT TOTAL DISTRIBUTION WITH MATPLOTLIB
+    # ------------------------------------------
     plt.figure(figsize=(12, 6))
 
-    # Genel toplam barlarını çizelim
+    # Plot the total count bars
     bars = plt.bar(names, total_counts, color='#4a90e2', edgecolor='black', alpha=0.85)
 
-    # Barların üzerine net toplam adetlerini yazalım
+    # Display the exact total numbers on top of each bar
     for bar in bars:
         yval = bar.get_height()
         plt.text(bar.get_x() + bar.get_width() / 2, yval + (max(total_counts) * 0.01),
                  f'{yval}', ha='center', va='bottom', fontsize=10, fontweight='bold')
 
-    plt.xlabel('Kusur Sınıfları', fontsize=12, fontweight='bold')
-    plt.ylabel('Toplam Nesne (Etiket) Sayısı', fontsize=12, fontweight='bold')
-    plt.title('Tüm Veri Setindeki Toplam Sınıf Dağılımı (Train + Val + Test)', fontsize=14, fontweight='bold')
+    plt.xlabel('Defect Classes', fontsize=12, fontweight='bold')
+    plt.ylabel('Total Object (Label) Count', fontsize=12, fontweight='bold')
+    plt.title('Total Class Distribution Across Entire Dataset (Train + Val + Test)', fontsize=14, fontweight='bold')
     plt.xticks(rotation=30, ha='right')
     plt.grid(axis='y', linestyle='--', alpha=0.5)
     plt.tight_layout()
 
-    print("\n[INFO] Toplam dağılım grafiği ekrana getiriliyor...")
+    print("\n[INFO] Displaying the total distribution graph...")
     plt.show()
 
 
